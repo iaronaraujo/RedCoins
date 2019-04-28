@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "72cd26f257d44c1114970e19afddcd812016007e"
+  version = "v1.4.1"
+
+[[projects]]
   digest = "1:bf618941b014c2a86e4a6f39d4a26541c06fc63387fc50d4694d67eac2151f4a"
   name = "github.com/labstack/echo"
   packages = ["."]
@@ -104,9 +112,40 @@
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
   version = "v0.3.2"
 
+[[projects]]
+  digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
+  name = "google.golang.org/appengine"
+  packages = ["cloudsql"]
+  pruneopts = "UT"
+  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
+  version = "v1.5.0"
+
+[[projects]]
+  digest = "1:3b304a7581fbfe1b8a798f5b7a9402608d48e0fcfda55208cf476b7e0ccba0c2"
+  name = "upper.io/db.v3"
+  packages = [
+    ".",
+    "internal/cache",
+    "internal/cache/hashstructure",
+    "internal/immutable",
+    "internal/sqladapter",
+    "internal/sqladapter/compat",
+    "internal/sqladapter/exql",
+    "lib/reflectx",
+    "lib/sqlbuilder",
+    "mysql",
+  ]
+  pruneopts = "UT"
+  revision = "2f58dea678dbdcd3710158e8572025ef4d2c6df7"
+  version = "v3.5.7"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/labstack/echo"]
+  input-imports = [
+    "github.com/labstack/echo",
+    "upper.io/db.v3/lib/sqlbuilder",
+    "upper.io/db.v3/mysql",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
