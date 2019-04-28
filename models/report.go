@@ -21,10 +21,10 @@ const (
 type Report struct {
 	ID              int             `db:"id" json:"id"`
 	Transaction     TransactionType `db:"transaction" json:"transaction"`
-	BitCoins        float32         `db:"bit_coins" json:"bit_coins"`
+	BitCoins        float32         `db:"bitcoins" json:"bit_coins"`
 	Reais           float32         `db:"reais" json:"reais"`
 	TransactionDate time.Time       `db:"transaction_date" json:"transaction_date"`
-	UserID 			int             `db:"user_id" json:"user_id"`
+	UserID          int             `db:"user_id" json:"user_id"`
 }
 
 //ReportModel receives the Database table

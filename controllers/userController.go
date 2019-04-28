@@ -14,15 +14,11 @@ func CreateUser(c echo.Context) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
 	password := c.FormValue("password")
-	bday := c.FormValue("bday")
-	bmonth := c.FormValue("bmonth")
-	byear := c.FormValue("byear")
+	bday, _ := strconv.Atoi(c.FormValue("bday"))
+	bmonth, _ := strconv.Atoi(c.FormValue("bmonth"))
+	byear, _ := strconv.Atoi(c.FormValue("byear"))
 
-	yearNum, _ := strconv.Atoi(byear)
-	monthNum, _ := strconv.Atoi(bmonth)
-	dayNum, _ := strconv.Atoi(bday)
-
-	birthDate := time.Date(yearNum, time.Month(monthNum), dayNum, 0, 0, 0, 0, time.UTC)
+	birthDate := time.Date(byear, time.Month(bmonth), bday, 0, 0, 0, 0, time.UTC)
 	birthDate.IsZero()
 
 	var user models.User
@@ -35,7 +31,6 @@ func CreateUser(c echo.Context) error {
 		if _, err := models.UserModel.Insert(user); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"message": err.Error(),
-				//"message": "Creation of a new user was not possible",
 			})
 		}
 
@@ -48,4 +43,51 @@ func CreateUser(c echo.Context) error {
 		"mensagem": "Name, email or password were empty",
 	})
 
+}
+
+// BuyBitCoins buy bitcoins
+func BuyBitCoins(c echo.Context) error {
+	return doBitCoinTransaction(c, models.BuyBitCoins)
+}
+
+//SellBitCoins sell bitcoins
+func SellBitCoins(c echo.Context) error {
+	return doBitCoinTransaction(c, models.SellBitCoins)
+}
+
+func doBitCoinTransaction(c echo.Context, transType models.TransactionType) error {
+	userID, _ := strconv.Atoi(c.FormValue("user_id"))
+	count, _ := models.UserModel.Find("id=?", userID).Count()
+	if count < 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"mensagem": "User not found",
+		})
+	}
+
+	bitcoins, _ := strconv.ParseFloat(c.FormValue("bitcoins"), 32)
+	reais := convertBitcoinsToReais(float32(bitcoins))
+	return createReport(c, transType, float32(bitcoins), reais, time.Now(), userID)
+}
+
+//CreateReport creates a transaction report
+func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, reais float32, date time.Time, userID int) error {
+	var report models.Report
+	report.Transaction = transType
+	report.BitCoins = bitcoins
+	report.Reais = reais
+	report.TransactionDate = date
+	report.UserID = userID
+
+	if _, err := models.ReportModel.Insert(report); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, report)
+
+}
+
+func convertBitcoinsToReais(bitcoins float32) float32 {
+	return bitcoins * 20000
 }

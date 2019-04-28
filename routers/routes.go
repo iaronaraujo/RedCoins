@@ -16,6 +16,8 @@ func init() {
 
 	api := App.Group("/api")
 	api.POST("/signup", controllers.CreateUser)
+	api.POST("/buybc", controllers.BuyBitCoins)
+	api.POST("/sellbc", controllers.SellBitCoins)
 }
 
 func home(c echo.Context) error {
