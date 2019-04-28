@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -88,6 +89,24 @@ func createReport(c echo.Context, transType models.TransactionType, bitcoins flo
 
 }
 
+type bitcoinData struct {
+	Data struct {
+		Quotes struct {
+			BRL struct {
+				Price float64 `json:"price"`
+			} `json:"BRL"`
+		} `json:"quotes"`
+	} `json:"data"`
+}
+
+// falta add tratamento de exceção aqui
 func convertBitcoinsToReais(bitcoins float32) float32 {
-	return bitcoins * 20000
+	response, _ := http.Get("https://api.coinmarketcap.com/v2/ticker/1/?convert=BRL")
+	var bcdata bitcoinData
+	err := json.NewDecoder(response.Body).Decode(&bcdata)
+	if err != nil {
+		println(err.Error())
+	}
+
+	return bitcoins * float32(bcdata.Data.Quotes.BRL.Price)
 }
