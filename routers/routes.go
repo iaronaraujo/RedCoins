@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 )
 
+//App represents RedCoins application
 var App *echo.Echo
 
 func init() {
@@ -18,6 +19,7 @@ func init() {
 	api.POST("/signup", controllers.CreateUser)
 	api.POST("/buybc", controllers.BuyBitCoins)
 	api.POST("/sellbc", controllers.SellBitCoins)
+	api.GET("/getReportsByUser", controllers.GetReportsByUserID)
 }
 
 func home(c echo.Context) error {
