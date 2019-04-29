@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/iaronaraujo/RedCoins/models"
+	"github.com/iaronaraujo/RedCoins/utils"
 	"github.com/labstack/echo"
 )
 
@@ -65,21 +65,23 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 		})
 	}
 
+	currencyTyp := utils.CurrencyType(c.FormValue("currency"))
 	bitcoins, _ := strconv.ParseFloat(c.FormValue("bitcoins"), 32)
-	reais := convertBitcoinsToReais(float32(bitcoins))
+	value := utils.ConvertBitcoinsToCurrency(float32(bitcoins), currencyTyp)
 	day, _ := strconv.Atoi(c.FormValue("day"))
 	month, _ := strconv.Atoi(c.FormValue("month"))
 	year, _ := strconv.Atoi(c.FormValue("year"))
 	transactionDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-	return createReport(c, transType, float32(bitcoins), reais, transactionDate, userID)
+	return createReport(c, transType, float32(bitcoins), value, currencyTyp, transactionDate, userID)
 }
 
 //CreateReport creates a transaction report
-func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, reais float32, date time.Time, userID int) error {
+func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, value float32, currTyp utils.CurrencyType, date time.Time, userID int) error {
 	var report models.Report
 	report.Transaction = transType
 	report.BitCoins = bitcoins
-	report.Reais = reais
+	report.Value = value
+	report.Currency = currTyp
 	report.TransactionDate = date
 	report.UserID = userID
 
@@ -91,26 +93,4 @@ func createReport(c echo.Context, transType models.TransactionType, bitcoins flo
 
 	return c.JSON(http.StatusCreated, report)
 
-}
-
-type bitcoinData struct {
-	Data struct {
-		Quotes struct {
-			BRL struct {
-				Price float64 `json:"price"`
-			} `json:"BRL"`
-		} `json:"quotes"`
-	} `json:"data"`
-}
-
-// falta add tratamento de exceção aqui
-func convertBitcoinsToReais(bitcoins float32) float32 {
-	response, _ := http.Get("https://api.coinmarketcap.com/v2/ticker/1/?convert=BRL")
-	var bcdata bitcoinData
-	err := json.NewDecoder(response.Body).Decode(&bcdata)
-	if err != nil {
-		println(err.Error())
-	}
-
-	return bitcoins * float32(bcdata.Data.Quotes.BRL.Price)
 }
