@@ -5,10 +5,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/iaronaraujo/RedCoins/models"
 	"github.com/iaronaraujo/RedCoins/utils"
 	"github.com/labstack/echo"
 )
+
+var jwtKey = []byte("my_secret_key")
 
 // CreateUser creates a redcoins user
 func CreateUser(c echo.Context) error {
@@ -46,6 +49,54 @@ func CreateUser(c echo.Context) error {
 
 }
 
+//Claims represents login claims
+type Claims struct {
+	UserID int `json:"user_id"`
+	jwt.StandardClaims
+}
+
+//Login signs an user in, returning an access token
+func Login(c echo.Context) error {
+	userMail := c.FormValue("email")
+	userPW := c.FormValue("password")
+	result := models.UserModel.Find("email=?", userMail)
+	count, err := result.Count()
+	if count != 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": err.Error(),
+		})
+	}
+	var users []models.User
+	result.All(&users)
+	user := users[0]
+	if user.Password != userPW {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Wrong Password",
+		})
+	}
+
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID: user.ID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusAccepted, map[string]string{
+		"token": tokenString,
+	})
+
+}
+
 // BuyBitCoins buy bitcoins
 func BuyBitCoins(c echo.Context) error {
 	return doBitCoinTransaction(c, models.BuyBitCoins)
@@ -61,7 +112,7 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 	count, _ := models.UserModel.Find("id=?", userID).Count()
 	if count < 1 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"mensagem": "User not found",
+			"message": "User not found",
 		})
 	}
 

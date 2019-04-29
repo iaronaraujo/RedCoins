@@ -19,6 +19,7 @@ func init() {
 	api.POST("/signup", controllers.CreateUser)
 	api.POST("/buybc", controllers.BuyBitCoins)
 	api.POST("/sellbc", controllers.SellBitCoins)
+	api.GET("/signin", controllers.Login)
 	api.GET("/getReportsByUser", controllers.GetReportsByUserID)
 	api.GET("/getReportsByDate", controllers.GetReportsByDate)
 }
