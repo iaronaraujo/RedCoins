@@ -67,7 +67,11 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 
 	bitcoins, _ := strconv.ParseFloat(c.FormValue("bitcoins"), 32)
 	reais := convertBitcoinsToReais(float32(bitcoins))
-	return createReport(c, transType, float32(bitcoins), reais, time.Now(), userID)
+	day, _ := strconv.Atoi(c.FormValue("day"))
+	month, _ := strconv.Atoi(c.FormValue("month"))
+	year, _ := strconv.Atoi(c.FormValue("year"))
+	transactionDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+	return createReport(c, transType, float32(bitcoins), reais, transactionDate, userID)
 }
 
 //CreateReport creates a transaction report
