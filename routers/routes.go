@@ -20,6 +20,7 @@ func init() {
 	api.POST("/buybc", controllers.BuyBitCoins)
 	api.POST("/sellbc", controllers.SellBitCoins)
 	api.GET("/getReportsByUser", controllers.GetReportsByUserID)
+	api.GET("/getReportsByDate", controllers.GetReportsByDate)
 }
 
 func home(c echo.Context) error {
