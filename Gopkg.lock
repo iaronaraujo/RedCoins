@@ -75,11 +75,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9ebbac90dda5bf921f6243b64d5abd0674ada63cdee056ff671f8658a00034ab"
+  digest = "1:efb99b3adaaa4e28d4e1d57f78df9516f0728cf7466c65805cb0bec262255069"
   name = "golang.org/x/crypto"
   packages = [
     "acme",
     "acme/autocert",
+    "bcrypt",
+    "blowfish",
   ]
   pruneopts = "UT"
   revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
@@ -159,6 +161,7 @@
     "github.com/dgrijalva/jwt-go",
     "github.com/labstack/echo",
     "github.com/labstack/echo/middleware",
+    "golang.org/x/crypto/bcrypt",
     "upper.io/db.v3/lib/sqlbuilder",
     "upper.io/db.v3/mysql",
   ]

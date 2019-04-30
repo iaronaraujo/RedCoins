@@ -9,6 +9,8 @@ import (
 	"github.com/iaronaraujo/RedCoins/tokenhandler"
 	"github.com/iaronaraujo/RedCoins/utils"
 	"github.com/labstack/echo"
+	"golang.org/x/crypto/bcrypt"
+	_ "golang.org/x/crypto/bcrypt"
 )
 
 // CreateUser creates a redcoins user
@@ -26,7 +28,7 @@ func CreateUser(c echo.Context) error {
 	var user models.User
 	user.Name = name
 	user.Email = email
-	user.Password = password
+	user.Password, _ = HashPassword(password)
 	user.BirthDate = birthDate
 
 	if name != "" && email != "" && password != "" {
@@ -51,7 +53,28 @@ func CreateUser(c echo.Context) error {
 func Login(c echo.Context) error {
 	userMail := c.FormValue("email")
 	userPW := c.FormValue("password")
-	return tokenhandler.GenerateToken(c, userMail, userPW)
+
+	result := models.UserModel.Find("email=?", userMail)
+	count, err := result.Count()
+	if count != 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": err.Error(),
+		})
+	}
+	var users []models.User
+	result.All(&users)
+	user := users[0]
+	if !CheckPasswordHash(userPW, user.Password) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Wrong Password",
+		})
+	}
+
+	tokenString := tokenhandler.GenerateToken(user)
+	return c.JSON(http.StatusAccepted, map[string]string{
+		"token": tokenString,
+	})
+
 }
 
 // BuyBitCoins buy bitcoins
@@ -106,4 +129,14 @@ func createReport(c echo.Context, transType models.TransactionType, bitcoins flo
 
 	return c.JSON(http.StatusCreated, report)
 
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
