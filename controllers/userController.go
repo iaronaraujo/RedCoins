@@ -25,11 +25,18 @@ func CreateUser(c echo.Context) error {
 	birthDate.IsZero()
 
 	var user models.User
+	var err error
 	user.Name = name
 	user.Email = email
-	user.Password, _ = utils.HashPassword(password)
+	user.Password, err = utils.HashPassword(password)
 	user.Type = userType
 	user.BirthDate = birthDate
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": err.Error(),
+		})
+	}
 
 	if name != "" && email != "" && password != "" {
 		if _, err := models.UserModel.Insert(user); err != nil {
@@ -56,7 +63,12 @@ func Login(c echo.Context) error {
 
 	result := models.UserModel.Find("email=?", userMail)
 	count, err := result.Count()
-	if count != 1 {
+	if count < 1 {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"message": "There isnt an user with this email",
+		})
+	}
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"message": err.Error(),
 		})
@@ -65,7 +77,7 @@ func Login(c echo.Context) error {
 	result.All(&users)
 	user := users[0]
 	if !utils.CheckPasswordHash(userPW, user.Password) {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusUnauthorized, map[string]string{
 			"message": "Wrong Password",
 		})
 	}
@@ -92,7 +104,7 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 	userID, _ := tokenhandler.GetLoggedUser(token)
 	count, _ := models.UserModel.Find("id=?", userID).Count()
 	if count < 1 {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusNotFound, map[string]string{
 			"message": "User not found",
 		})
 	}

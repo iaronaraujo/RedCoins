@@ -24,12 +24,6 @@ func GetReportsByUserID(c echo.Context) error {
 
 	userID := c.FormValue("userID")
 	result := models.ReportModel.Find("user_id=?", userID)
-	count, _ := result.Count()
-	if count < 1 {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "User not found",
-		})
-	}
 	var reports []models.Report
 	result.All(&reports)
 	return c.JSON(http.StatusAccepted, reports)
@@ -52,12 +46,6 @@ func GetReportsByDate(c echo.Context) error {
 	reportDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 
 	result := models.ReportModel.Find("transaction_date=?", reportDate)
-	count, err := result.Count()
-	if count < 1 {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": err.Error(),
-		})
-	}
 	var reports []models.Report
 	result.All(&reports)
 	return c.JSON(http.StatusAccepted, reports)
