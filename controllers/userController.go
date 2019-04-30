@@ -9,8 +9,6 @@ import (
 	"github.com/iaronaraujo/RedCoins/tokenhandler"
 	"github.com/iaronaraujo/RedCoins/utils"
 	"github.com/labstack/echo"
-	"golang.org/x/crypto/bcrypt"
-	_ "golang.org/x/crypto/bcrypt"
 )
 
 // CreateUser creates a redcoins user
@@ -18,6 +16,7 @@ func CreateUser(c echo.Context) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
 	password := c.FormValue("password")
+	userType := models.UserType(c.FormValue("type"))
 	bday, _ := strconv.Atoi(c.FormValue("bday"))
 	bmonth, _ := strconv.Atoi(c.FormValue("bmonth"))
 	byear, _ := strconv.Atoi(c.FormValue("byear"))
@@ -28,7 +27,8 @@ func CreateUser(c echo.Context) error {
 	var user models.User
 	user.Name = name
 	user.Email = email
-	user.Password, _ = HashPassword(password)
+	user.Password, _ = utils.HashPassword(password)
+	user.Type = userType
 	user.BirthDate = birthDate
 
 	if name != "" && email != "" && password != "" {
@@ -39,12 +39,12 @@ func CreateUser(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusCreated, map[string]string{
-			"messagem": "User created successfully!",
+			"message": "User created successfully!",
 		})
 	}
 
 	return c.JSON(http.StatusBadRequest, map[string]string{
-		"mensagem": "Name, email or password were empty",
+		"message": "Name, email or password were empty",
 	})
 
 }
@@ -64,7 +64,7 @@ func Login(c echo.Context) error {
 	var users []models.User
 	result.All(&users)
 	user := users[0]
-	if !CheckPasswordHash(userPW, user.Password) {
+	if !utils.CheckPasswordHash(userPW, user.Password) {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"message": "Wrong Password",
 		})
@@ -89,7 +89,7 @@ func SellBitCoins(c echo.Context) error {
 
 func doBitCoinTransaction(c echo.Context, transType models.TransactionType) error {
 	token := c.Request().Header.Get("token")
-	userID := tokenhandler.GetLoggedUser(token)
+	userID, _ := tokenhandler.GetLoggedUser(token)
 	count, _ := models.UserModel.Find("id=?", userID).Count()
 	if count < 1 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -129,14 +129,4 @@ func createReport(c echo.Context, transType models.TransactionType, bitcoins flo
 
 	return c.JSON(http.StatusCreated, report)
 
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }

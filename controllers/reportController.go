@@ -7,18 +7,27 @@ import (
 	"time"
 
 	"github.com/iaronaraujo/RedCoins/models"
+	"github.com/iaronaraujo/RedCoins/tokenhandler"
 	"github.com/labstack/echo"
 )
 
 //GetReportsByUserID gets the reports of an user by its id
 func GetReportsByUserID(c echo.Context) error {
-	userID := c.FormValue("userID")
+	token := c.Request().Header.Get("token")
+	_, userType := tokenhandler.GetLoggedUser(token)
 
+	if userType != models.ADMIN {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "You need to be an admin to view the reports",
+		})
+	}
+
+	userID := c.FormValue("userID")
 	result := models.ReportModel.Find("user_id=?", userID)
-	count, err := result.Count()
+	count, _ := result.Count()
 	if count < 1 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"messagem": err.Error(),
+			"message": "User not found",
 		})
 	}
 	var reports []models.Report
@@ -28,6 +37,15 @@ func GetReportsByUserID(c echo.Context) error {
 
 //GetReportsByDate gets the reports of an user by its id
 func GetReportsByDate(c echo.Context) error {
+	token := c.Request().Header.Get("token")
+	_, userType := tokenhandler.GetLoggedUser(token)
+
+	if userType != models.ADMIN {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "You need to be an admin to view the reports",
+		})
+	}
+
 	day, _ := strconv.Atoi(c.FormValue("day"))
 	month, _ := strconv.Atoi(c.FormValue("month"))
 	year, _ := strconv.Atoi(c.FormValue("year"))
@@ -37,7 +55,7 @@ func GetReportsByDate(c echo.Context) error {
 	count, err := result.Count()
 	if count < 1 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"messagem": err.Error(),
+			"message": err.Error(),
 		})
 	}
 	var reports []models.Report

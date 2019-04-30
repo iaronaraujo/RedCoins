@@ -11,7 +11,8 @@ var jwtKey = []byte("my_secret_key")
 
 //Claims represents login claims
 type Claims struct {
-	UserID int64 `json:"user_id"`
+	UserID   int64           `json:"user_id"`
+	UserType models.UserType `json:"user_type"`
 	jwt.StandardClaims
 }
 
@@ -20,7 +21,8 @@ func GenerateToken(user models.User) string {
 
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
-		UserID: user.ID,
+		UserID:   user.ID,
+		UserType: user.Type,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -31,7 +33,7 @@ func GenerateToken(user models.User) string {
 }
 
 //GetLoggedUser returns the id of the user related to the token or -1 if the token isn't valid
-func GetLoggedUser(token string) int64 {
+func GetLoggedUser(token string) (int64, models.UserType) {
 
 	claims := &Claims{}
 
@@ -39,8 +41,8 @@ func GetLoggedUser(token string) int64 {
 		return jwtKey, nil
 	})
 	if !tkn.Valid || err != nil {
-		return -1
+		return -1, models.NORMAL
 	}
-	return claims.UserID
+	return claims.UserID, claims.UserType
 
 }
