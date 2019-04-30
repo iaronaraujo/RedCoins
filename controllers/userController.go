@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/iaronaraujo/RedCoins/models"
-	tokenhandler "github.com/iaronaraujo/RedCoins/tokenHandler"
+	"github.com/iaronaraujo/RedCoins/tokenhandler"
 	"github.com/iaronaraujo/RedCoins/utils"
 	"github.com/labstack/echo"
 )
@@ -65,7 +65,8 @@ func SellBitCoins(c echo.Context) error {
 }
 
 func doBitCoinTransaction(c echo.Context, transType models.TransactionType) error {
-	userID, _ := strconv.Atoi(c.FormValue("user_id"))
+	token := c.Request().Header.Get("token")
+	userID := tokenhandler.GetLoggedUser(token)
 	count, _ := models.UserModel.Find("id=?", userID).Count()
 	if count < 1 {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -84,7 +85,7 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 }
 
 //CreateReport creates a transaction report
-func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, value float32, currTyp utils.CurrencyType, date time.Time, userID int) error {
+func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, value float32, currTyp utils.CurrencyType, date time.Time, userID int64) error {
 	var report models.Report
 	report.Transaction = transType
 	report.BitCoins = bitcoins
@@ -93,11 +94,15 @@ func createReport(c echo.Context, transType models.TransactionType, bitcoins flo
 	report.TransactionDate = date
 	report.UserID = userID
 
-	if _, err := models.ReportModel.Insert(report); err != nil {
+	newID, err := models.ReportModel.Insert(report)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"message": err.Error(),
 		})
 	}
+
+	id, _ := newID.(int64)
+	report.ID = id
 
 	return c.JSON(http.StatusCreated, report)
 

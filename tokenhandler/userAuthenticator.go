@@ -13,7 +13,7 @@ var jwtKey = []byte("my_secret_key")
 
 //Claims represents login claims
 type Claims struct {
-	UserID int `json:"user_id"`
+	UserID int64 `json:"user_id"`
 	jwt.StandardClaims
 }
 
@@ -54,4 +54,19 @@ func GenerateToken(c echo.Context, userMail string, userPW string) error {
 	return c.JSON(http.StatusAccepted, map[string]string{
 		"token": tokenString,
 	})
+}
+
+//GetLoggedUser returns the id of the user related to the token or -1 if the token isn't valid
+func GetLoggedUser(token string) int64 {
+
+	claims := &Claims{}
+
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if !tkn.Valid || err != nil {
+		return -1
+	}
+	return claims.UserID
+
 }
