@@ -12,11 +12,11 @@ import (
 type TransactionType string
 
 const (
-	//BuyBitCoins represents the type related to bit coins buy order
-	BuyBitCoins TransactionType = "Compra de BC"
+	//BuyBitCoins represents the type related to BitCoins buy order
+	BuyBitCoins TransactionType = "BUY_BC"
 
-	//SellBitCoins represents the type related to bit coins sell order
-	SellBitCoins TransactionType = "Venda de BC"
+	//SellBitCoins represents the type related to BitCoins sell order
+	SellBitCoins TransactionType = "SELL_BC"
 )
 
 //Report represents a transaction report in redcoins
@@ -30,5 +30,5 @@ type Report struct {
 	UserID          int64              `db:"user_id" json:"user_id"`
 }
 
-//ReportModel receives the Database table
+//ReportModel receives the Database table data related to reports
 var ReportModel = lib.Sess.Collection("reports")

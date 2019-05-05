@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-// CreateUser creates a redcoins user
+// CreateUser creates a RedCoins user
 func CreateUser(c echo.Context) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
@@ -89,16 +89,17 @@ func Login(c echo.Context) error {
 
 }
 
-// BuyBitCoins buy bitcoins
+// BuyBitCoins is the operation an user can make to buy BitCoins, which generates a report
 func BuyBitCoins(c echo.Context) error {
 	return doBitCoinTransaction(c, models.BuyBitCoins)
 }
 
-//SellBitCoins sell bitcoins
+//SellBitCoins is the operation an user can make to sell BitCoins, which generates a report.
 func SellBitCoins(c echo.Context) error {
 	return doBitCoinTransaction(c, models.SellBitCoins)
 }
 
+//doBitCoinTransaction executes a buy or sell BitCoins transaction
 func doBitCoinTransaction(c echo.Context, transType models.TransactionType) error {
 	token := c.Request().Header.Get("token")
 	userID, _ := tokenhandler.GetLoggedUser(token)
@@ -119,7 +120,7 @@ func doBitCoinTransaction(c echo.Context, transType models.TransactionType) erro
 	return createReport(c, transType, float32(bitcoins), value, currencyTyp, transactionDate, userID)
 }
 
-//CreateReport creates a transaction report
+//createReport creates a transaction report
 func createReport(c echo.Context, transType models.TransactionType, bitcoins float32, value float32, currTyp utils.CurrencyType, date time.Time, userID int64) error {
 	var report models.Report
 	report.Transaction = transType

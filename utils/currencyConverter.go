@@ -28,6 +28,7 @@ type currencyData struct {
 	bitcoinQuoteMap map[CurrencyType]float32
 }
 
+//bitcoinData represents the structure of the JSON from the coinmarketcap API
 type bitcoinData struct {
 	Data struct {
 		Quotes struct {
@@ -41,7 +42,6 @@ type bitcoinData struct {
 	} `json:"data"`
 }
 
-// falta add tratamento de exceção aqui
 func updateCurrencyData() {
 	response, _ := http.Get("https://api.coinmarketcap.com/v2/ticker/1/?convert=BRL")
 	var bcdata bitcoinData
@@ -54,10 +54,10 @@ func updateCurrencyData() {
 	currencyDataInst.bitcoinQuoteMap[USD] = float32(bcdata.Data.Quotes.USD.Price)
 }
 
-/*
-getBitCoinQuote gets the quote for a certain currency.
-Returns how much 1 bitcoin can buy of a certain currency.
-The quote is returned with an 1 hour margin of error */
+
+//getBitCoinQuote gets the quote for a certain currency.
+//Returns how much 1 bitcoin can buy of a certain currency.
+//The quote is returned with an 1 hour margin of error
 func getBitCoinQuote(currTyp CurrencyType) float32 {
 	now := time.Now()
 	limit := currencyDataInst.lastUpdated.Add(time.Hour)

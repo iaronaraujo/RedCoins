@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-//GetReportsByUserID gets the reports of an user by its id
+//GetReportsByUserID gets the reports with the same UserID as the one passed to the form
 func GetReportsByUserID(c echo.Context) error {
 	token := c.Request().Header.Get("token")
 	_, userType := tokenhandler.GetLoggedUser(token)
@@ -29,7 +29,7 @@ func GetReportsByUserID(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, reports)
 }
 
-//GetReportsByDate gets the reports of an user by its id
+//GetReportsByDate gets the reports with the same date as the date passed to the form
 func GetReportsByDate(c echo.Context) error {
 	token := c.Request().Header.Get("token")
 	_, userType := tokenhandler.GetLoggedUser(token)

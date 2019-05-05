@@ -26,5 +26,5 @@ type User struct {
 	BirthDate time.Time `db:"birth_date" json:"birth_date"`
 }
 
-// UserModel receives the DataBase table
+// UserModel receives the DataBase table data related to users
 var UserModel = lib.Sess.Collection("users")
