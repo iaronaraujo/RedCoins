@@ -36,3 +36,5 @@ After that, you can run the app.go file normally and it should open the applicat
 ## Details
 
 Even though you pass the date of operation when you buy or sell bitcoin, the quote is calculated based on the *current* date. This operation was done this way because it was not possible to get the bitcoin quote for other dates using the free API.
+
+Check the wiki page for more details.
