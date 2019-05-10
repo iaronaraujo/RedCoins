@@ -33,8 +33,18 @@ You will then have to change the [file](https://github.com/iaronaraujo/RedCoins/
 
 After that, you can run the app.go file normally and it should open the application on localhost:3000
 
+## Docker
+
+https://cloud.docker.com/u/iaronaraujo/repository/docker/iaronaraujo/redcoins
+
+image name: iaronaraujo/redcoins
+
+To execute the docker image it is necessary to have the database set up on localhost and then run "docker run --net=host iaronaraujo/redcoins"
+
+This was tested on a Linux.
+
 ## Details
 
 Even though you pass the date of operation when you buy or sell bitcoin, the quote is calculated based on the *current* date. This operation was done this way because it was not possible to get the bitcoin quote for other dates using the free API.
 
-Check the wiki page for more details.
+Check the wiki page for more details about the API.
